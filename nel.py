@@ -1,14 +1,13 @@
-#!/usr/local/bin/python3
+#!/usr/bin/env python3
 # *-* coding: UTF-8 *-*
-# Authors: Jessica Roady & Rebecka Fahrni
+# Authors: Jessica Roady & Kyra Goud
 
 import requests
 import csv
 import json
 import spacy
-# You will have to run the following in the command line:
+# You will have to run the following in the command line. Alternatively, try en_core_web_trf for a bigger model:
 # python3 -m spacy download en_core_web_sm
-# Alternatively, try en_core_web_trf for a bigger model.
 
 # If spaCy creates problems with the above, try uncommenting the following:
 # from spacy.cli.download import download
@@ -51,7 +50,7 @@ def get_response(url, params):
     return response.json()
 
 
-# TODO:
+# TODO: Implement a CLI
 def parse_cli():
     pass
 
