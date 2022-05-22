@@ -3,6 +3,7 @@
 # Authors: Jessica Roady & Kyra Goud
 
 import requests
+import re
 import csv
 import json
 import spacy
@@ -57,15 +58,39 @@ def parse_cli():
 
 def read_file(file):
     with open(file, 'r') as f:
-        lines = [line.rstrip() for line in f if not line == '\n']
+        lines = [line.rstrip() for line in f]
         params1['text'] = lines
     return lines
 
 
-# TODO:
+def strip_headers_footers(lines):
+    """Strip Project Gutenberg headers/footers"""
+
+    r_header = re.compile(r"\*\*\* START OF THE PROJECT GUTENBERG EBOOK .*")
+    header_line = list(filter(r_header.match, lines))[0]
+    r_footer = re.compile(r"\*\*\* END OF THE PROJECT GUTENBERG EBOOK .*")
+    footer_line = list(filter(r_footer.match, lines))[0]
+
+    header_index = lines.index(header_line)
+    footer_index = lines.index(footer_line)
+
+    return lines[header_index+5:footer_index-4]  # +5 and -4 to get rid of trailing newlines
+
+
+# TODO: Via CLI, make this part run only if the user says their text has artificial line breaks
 def preprocess_file(lines):
-    """Strip the unwanted PG headers/footers, maybe fix artificial line breaks"""
-    pass
+    """Fix artificial line breaks"""
+    paragraph = ''
+    paragraphs = []
+
+    for line in lines:  # If the line is a newline, we will know the paragraph has ended.
+        if line == '':  # It will be '' and not '\n' because we did line.strip() when reading in the file.
+            paragraphs.append(paragraph)  # We can add it to our list of paragraphs...
+            paragraph = ''  # ...and reset the paragraph string to start at the next paragraph.
+        else:  # Otherwise, we keep on appending lines, making sure to add a whitespace at the end of each one.
+            paragraph += line + ' '
+
+    return paragraphs
 
 
 def get_link(babelsynsetID):
@@ -204,21 +229,24 @@ def write_tsv(data):
 
 
 def main():
-    lines = read_file('bbc_article.txt')  # TODO: make this take command-line input
-    tokens, lemmas, pos, tok_index, entities, ent_on_off, synsetIds, links = generate_data(lines)
-    ent_info = remove_duplicate_ents(entities, ent_on_off, synsetIds, links)
-    data = align_toks_to_ents(tokens, lemmas, pos, tok_index, ent_info)
-    write_tsv(data)
+    lines = read_file('bible.txt')  # TODO: make this take command-line input
+    stripped_lines = strip_headers_footers(lines)
+    print(stripped_lines[-10:])
 
-    # Getting API-response from request and creating a .json file out of it
-    datadis = {}
-    for i, text in enumerate(params1['text'], start=1):
-        params1['text'] = text
-        response_dis = requests.get(service_url_disambiguate, params=params1, headers=headers)
-        json_data_dis = response_dis.json()
-        datadis['text ' + str(i)] = json_data_dis
-
-    create_json_file(datadis)
+    # tokens, lemmas, pos, tok_index, entities, ent_on_off, synsetIds, links = generate_data(lines)
+    # ent_info = remove_duplicate_ents(entities, ent_on_off, synsetIds, links)
+    # data = align_toks_to_ents(tokens, lemmas, pos, tok_index, ent_info)
+    # write_tsv(data)
+    #
+    # # Getting API-response from request and creating a .json file out of it
+    # datadis = {}
+    # for i, text in enumerate(params1['text'], start=1):
+    #     params1['text'] = text
+    #     response_dis = requests.get(service_url_disambiguate, params=params1, headers=headers)
+    #     json_data_dis = response_dis.json()
+    #     datadis['text ' + str(i)] = json_data_dis
+    #
+    # create_json_file(datadis)
 
 
 if __name__ == "__main__":
