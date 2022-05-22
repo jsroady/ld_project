@@ -65,7 +65,6 @@ def read_file(file):
 
 def strip_headers_footers(lines):
     """Strip Project Gutenberg headers/footers"""
-
     r_header = re.compile(r"\*\*\* START OF THE PROJECT GUTENBERG EBOOK .*")
     header_line = list(filter(r_header.match, lines))[0]
     r_footer = re.compile(r"\*\*\* END OF THE PROJECT GUTENBERG EBOOK .*")
@@ -77,13 +76,13 @@ def strip_headers_footers(lines):
     return lines[header_index+5:footer_index-4]  # +5 and -4 to get rid of trailing newlines
 
 
-# TODO: Via CLI, make this part run only if the user says their text has artificial line breaks
-def preprocess_file(lines):
+# TODO: Once CLI is implemented, make this part run only if the user says their text has artificial line breaks
+def para_tokenise(stripped_lines):
     """Fix artificial line breaks"""
     paragraph = ''
     paragraphs = []
 
-    for line in lines:  # If the line is a newline, we will know the paragraph has ended.
+    for line in stripped_lines:  # If the line is a newline, we will know the paragraph has ended.
         if line == '':  # It will be '' and not '\n' because we did line.strip() when reading in the file.
             paragraphs.append(paragraph)  # We can add it to our list of paragraphs...
             paragraph = ''  # ...and reset the paragraph string to start at the next paragraph.
@@ -231,7 +230,10 @@ def write_tsv(data):
 def main():
     lines = read_file('bible.txt')  # TODO: make this take command-line input
     stripped_lines = strip_headers_footers(lines)
-    print(stripped_lines[-10:])
+    paragraphs = para_tokenise(stripped_lines)
+
+    for p in paragraphs[:50]:
+        print(p)
 
     # tokens, lemmas, pos, tok_index, entities, ent_on_off, synsetIds, links = generate_data(lines)
     # ent_info = remove_duplicate_ents(entities, ent_on_off, synsetIds, links)
