@@ -14,28 +14,29 @@ import spacy
 # from spacy.cli.download import download
 # download(model='en_core_web_sm')
 
-# variables for URL-API information retrieval
+# Variables for URL-API information retrieval (1000 requests per day and per key):
+# Jessica's key: ac0e292a-80e6-4040-8f33-64105a016803
+# Simon's key: f18a3a58-5499-4e50-ad27-a9512055f56b
+# Kyra's key: 90f56d8f-b050-4366-a9f8-e183cec01edc
 key = 'f18a3a58-5499-4e50-ad27-a9512055f56b'
 lang = 'EN'
 headers = {'Accept-Encoding': 'gzip'}
 text = ''
 lemma = ''
 
-# parameters of API-urls
+# Parameters of API-urls:
 params1 = {
     'text':text,  # list of strings from read_file()
     'lang':lang,
     'key': key,
 }
-
-# parameters of API-urls
 params2 = {
     'lemma':lemma,
     'lang':lang,
     'key':key
 }
 
-#  URLs for information retrieval of API
+#  URLs for information retrieval of API:
 service_url_disambiguate = 'https://babelfy.io/v1/disambiguate'
 service_url_retrievesynset = 'https://babelnet.io/v6/getSynsetIds'
 url_retrievesynsets = f'https://babelnet.io/v6/getSynsetIds?lemma{lemma}&searchLang={lang}&key={key}'.format(
@@ -59,7 +60,6 @@ def parse_cli():
 def read_file(file):
     with open(file, 'r') as f:
         lines = [line.rstrip() for line in f]
-        params1['text'] = lines
     return lines
 
 
@@ -232,23 +232,27 @@ def main():
     stripped_lines = strip_headers_footers(lines)
     paragraphs = para_tokenise(stripped_lines)
 
-    for p in paragraphs[:50]:
-        print(p)
+    # TODO: change this to = stripped_lines if user says their text does not have artificial line breaks
+    # params1['text'] = paragraphs
 
-    # tokens, lemmas, pos, tok_index, entities, ent_on_off, synsetIds, links = generate_data(lines)
-    # ent_info = remove_duplicate_ents(entities, ent_on_off, synsetIds, links)
-    # data = align_toks_to_ents(tokens, lemmas, pos, tok_index, ent_info)
-    # write_tsv(data)
-    #
-    # # Getting API-response from request and creating a .json file out of it
-    # datadis = {}
-    # for i, text in enumerate(params1['text'], start=1):
-    #     params1['text'] = text
-    #     response_dis = requests.get(service_url_disambiguate, params=params1, headers=headers)
-    #     json_data_dis = response_dis.json()
-    #     datadis['text ' + str(i)] = json_data_dis
-    #
-    # create_json_file(datadis)
+    # For dev purposes, I'll work with just 10 paragraphs:
+    extract = paragraphs[10:21]
+    params1['text'] = extract
+
+    # Getting API-response from request and creating a .json file out of it
+    datadis = {}
+    for i, text in enumerate(params1['text'], start=1):
+        params1['text'] = text
+        response_dis = requests.get(service_url_disambiguate, params=params1, headers=headers)
+        json_data_dis = response_dis.json()
+        datadis['text ' + str(i)] = json_data_dis
+
+    create_json_file(datadis)
+
+    tokens, lemmas, pos, tok_index, entities, ent_on_off, synsetIds, links = generate_data(extract)
+    ent_info = remove_duplicate_ents(entities, ent_on_off, synsetIds, links)
+    data = align_toks_to_ents(tokens, lemmas, pos, tok_index, ent_info)
+    write_tsv(data)
 
 
 if __name__ == "__main__":
