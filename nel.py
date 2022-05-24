@@ -162,7 +162,7 @@ def remove_duplicate_ents(entities, ent_on_off, synsetIds, links):
             e2_on = item[1][0]
             e2_off = item[1][1]
 
-            # Using the type as a flag for later removal, because if I just remove it the indices will get messed up
+            # Using the type as a flag for later removal, because if I just remove it now the indices will get messed up
             if e1_on >= e2_on and e1_off <= e2_off:
                 ent_info[i - 1] = list(ent_info[i - 1])
             if e1_on <= e2_on and e1_off >= e2_off:
@@ -202,15 +202,8 @@ def align_toks_to_ents(tokens, lemmas, pos, tok_index, ent_info):
             elif ' ' + t[0] in entity and t[3][1] == ent_index[1]:
                 if not len(row) == 7:
                     row.extend([entity, 'I-' + ent_id, ent_link])
-
-            # TODO: this is a problem because there are ents longer than 3 tokens now
-
-            #   if the onsets are within 1 of each other (this is enough because there are no entities longer than 3):
-            elif ' ' + t[0] + ' ' in entity and t[3][0] - 1 == ent_index[0]:
-                if not len(row) == 7:
-                    row.extend([entity, 'I-' + ent_id, ent_link])
-            #   if the offsets are within 1 of each other:
-            elif ' ' + t[0] + ' ' in entity and t[3][1] + 1 == ent_index[1]:
+            #   if the token on/offsets are within the entity on/offsets:
+            elif ' ' + t[0] + ' ' in entity and t[3][0] > ent_index[0] and t[3][1] < ent_index[1]:
                 if not len(row) == 7:
                     row.extend([entity, 'I-' + ent_id, ent_link])
 
