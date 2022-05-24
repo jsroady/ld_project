@@ -16,9 +16,11 @@ import spacy
 
 # Variables for URL-API information retrieval (1000 requests per day and per key):
 # Jessica's key: ac0e292a-80e6-4040-8f33-64105a016803
+# Jessica's key 2: 1a12a465-41cd-4109-b4f3-5e84529bfaac
+# Jessica's key 3: 642b0a6e-678b-4e0f-9997-2aac099430e2
 # Simon's key: f18a3a58-5499-4e50-ad27-a9512055f56b
 # Kyra's key: 90f56d8f-b050-4366-a9f8-e183cec01edc
-key = 'f18a3a58-5499-4e50-ad27-a9512055f56b'
+key = '642b0a6e-678b-4e0f-9997-2aac099430e2'
 lang = 'EN'
 headers = {'Accept-Encoding': 'gzip'}
 text = ''
@@ -182,23 +184,35 @@ def align_toks_to_ents(tokens, lemmas, pos, tok_index, ent_info):
         row = list(t)
 
         for e in ent_info:
+            entity = e[0]
+            ent_index = e[1]
+            ent_id = e[2]
+            ent_link = e[3]
+
             # Single-token entities:
-            if t[0] == e[0] and t[3] == e[1]:  # OK because no two identical tokens also have the same indices
-                row.extend([e[0], 'B-' + e[2], e[3]])
+            if t[0] == entity and t[3] == ent_index:  # OK because no two identical tokens also have the same indices
+                row.extend([entity, 'B-' + ent_id, ent_link])
 
             # Multi-token entities:
             #   if the onset is the same:
-            elif t[0] + ' ' in e[0] and t[3][0] == e[1][0]:
+            elif t[0] + ' ' in entity and t[3][0] == ent_index[0]:
                 if not len(row) == 7:  # needed to avoid appending the entity multiple times
-                    row.extend([e[0], 'B-' + e[2], e[3]])
+                    row.extend([entity, 'B-' + ent_id, ent_link])
             #   if the offset is the same:
-            elif ' ' + t[0] in e[0] and t[3][1] == e[1][1]:
+            elif ' ' + t[0] in entity and t[3][1] == ent_index[1]:
                 if not len(row) == 7:
-                    row.extend([e[0], 'I-' + e[2], e[3]])
+                    row.extend([entity, 'I-' + ent_id, ent_link])
+
+            # TODO: this is a problem because there are ents longer than 3 tokens now
+
             #   if the onsets are within 1 of each other (this is enough because there are no entities longer than 3):
-            elif ' ' + t[0] + ' ' in e[0] and t[3][0] - 1 == e[1][0]:
+            elif ' ' + t[0] + ' ' in entity and t[3][0] - 1 == ent_index[0]:
                 if not len(row) == 7:
-                    row.extend([e[0], 'I-' + e[2], e[3]])
+                    row.extend([entity, 'I-' + ent_id, ent_link])
+            #   if the offsets are within 1 of each other:
+            elif ' ' + t[0] + ' ' in entity and t[3][1] + 1 == ent_index[1]:
+                if not len(row) == 7:
+                    row.extend([entity, 'I-' + ent_id, ent_link])
 
         data.append(row)
 
@@ -251,6 +265,7 @@ def main():
 
     tokens, lemmas, pos, tok_index, entities, ent_on_off, synsetIds, links = generate_data(extract)
     ent_info = remove_duplicate_ents(entities, ent_on_off, synsetIds, links)
+
     data = align_toks_to_ents(tokens, lemmas, pos, tok_index, ent_info)
     write_tsv(data)
 
