@@ -20,7 +20,7 @@ import spacy
 # Jessica's key 3: 642b0a6e-678b-4e0f-9997-2aac099430e2
 # Simon's key: f18a3a58-5499-4e50-ad27-a9512055f56b
 # Kyra's key: 90f56d8f-b050-4366-a9f8-e183cec01edc
-key = '642b0a6e-678b-4e0f-9997-2aac099430e2'
+key = 'ac0e292a-80e6-4040-8f33-64105a016803'
 lang = 'EN'
 headers = {'Accept-Encoding': 'gzip'}
 text = ''
@@ -54,11 +54,6 @@ def get_response(url, params):
     return response.json()
 
 
-# TODO: Implement a CLI
-def parse_cli():
-    pass
-
-
 def read_file(file):
     with open(file, 'r') as f:
         lines = [line.rstrip() for line in f]
@@ -78,7 +73,6 @@ def strip_headers_footers(lines):
     return lines[header_index+5:footer_index-4]  # +5 and -4 to get rid of trailing newlines
 
 
-# TODO: Once CLI is implemented, make this part run only if the user says their text has artificial line breaks
 def para_tokenise(stripped_lines):
     """Fix artificial line breaks"""
     paragraph = ''
@@ -228,40 +222,7 @@ def create_json_file(data_disambiguate):
 def write_tsv(data):
     """ Creates a .tsv file of data """
     with open('data.tsv', 'w', encoding='UTF8', newline='\n') as f:
-        header = ['token', 'lemma', 'pos', '(onset, offset)', 'entity', 'babelfy_id(iob)', 'link', 'TP', 'FP', 'FN']
+        header = ['token', 'lemma', 'pos', '(onset, offset)', 'entity', 'babelfy_id(BIO)', 'link', 'TP', 'FP', 'FN']
         writer = csv.writer(f, delimiter='\t')
         writer.writerow(header)
         writer.writerows(data)
-
-
-def main():
-    lines = read_file('bible.txt')  # TODO: make this take command-line input
-    stripped_lines = strip_headers_footers(lines)
-    paragraphs = para_tokenise(stripped_lines)
-
-    # TODO: change this to = stripped_lines if user says their text does not have artificial line breaks
-    # params1['text'] = paragraphs
-
-    # For dev purposes, I'll work with just 10 paragraphs:
-    extract = paragraphs[10:21]
-    params1['text'] = extract
-
-    # Getting API-response from request and creating a .json file out of it
-    datadis = {}
-    for i, text in enumerate(params1['text'], start=1):
-        params1['text'] = text
-        response_dis = requests.get(service_url_disambiguate, params=params1, headers=headers)
-        json_data_dis = response_dis.json()
-        datadis['text ' + str(i)] = json_data_dis
-
-    create_json_file(datadis)
-
-    tokens, lemmas, pos, tok_index, entities, ent_on_off, synsetIds, links = generate_data(extract)
-    ent_info = remove_duplicate_ents(entities, ent_on_off, synsetIds, links)
-
-    data = align_toks_to_ents(tokens, lemmas, pos, tok_index, ent_info)
-    write_tsv(data)
-
-
-if __name__ == "__main__":
-    main()

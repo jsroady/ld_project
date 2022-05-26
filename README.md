@@ -6,3 +6,4 @@
 
 ## To do:
 - allow user to enable partial matches
+- calculate IAA between us on an excerpt
