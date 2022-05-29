@@ -15,7 +15,7 @@ import spacy
 # download(model='en_core_web_sm')
 
 # Variables for URL-API information retrieval (1000 requests per day and per key):
-# Jessica's key: ac0e292a-80e6-4040-8f33-64105a016803
+# Jessica's key 1: ac0e292a-80e6-4040-8f33-64105a016803
 # Jessica's key 2: 1a12a465-41cd-4109-b4f3-5e84529bfaac
 # Jessica's key 3: 642b0a6e-678b-4e0f-9997-2aac099430e2
 # Simon's key: f18a3a58-5499-4e50-ad27-a9512055f56b
@@ -27,16 +27,8 @@ text = ''
 lemma = ''
 
 # Parameters of API-urls:
-params1 = {
-    'text':text,  # list of strings from read_file()
-    'lang':lang,
-    'key': key,
-}
-params2 = {
-    'lemma':lemma,
-    'lang':lang,
-    'key':key
-}
+params1 = {'text':text, 'lang':lang, 'key': key}
+params2 = {'lemma':lemma, 'lang':lang, 'key':key}
 
 #  URLs for information retrieval of API:
 service_url_disambiguate = 'https://babelfy.io/v1/disambiguate'
@@ -46,12 +38,6 @@ url_retrievesynsets = f'https://babelnet.io/v6/getSynsetIds?lemma{lemma}&searchL
 url_babelfyversion = f'https://babelnet.io/v6/getVersion?key={key}'.format(key=params1['key'])
 url_disambiguate = f'https://babelfy.io/v1/disambiguate?text={text}&lang={lang}&key={key}'.format(
     text=params1['text'],lang=params1['lang'],key=params1['key'])
-
-
-def get_response(url, params):
-    """ Returns the API-response (json format)"""
-    response = requests.get(url, params=params, headers=headers)
-    return response.json()
 
 
 def read_file(file):
@@ -122,6 +108,7 @@ def generate_data(lines):
             pos.append(token.pos_)
 
         results_per_text = json_content[texts]
+
         for result in results_per_text:
             # token from fragment retrieval
             tokenFragment = result.get('tokenFragment')
@@ -156,7 +143,7 @@ def remove_duplicate_ents(entities, ent_on_off, synsetIds, links):
             e2_on = item[1][0]
             e2_off = item[1][1]
 
-            # Using the type as a flag for later removal, because if I just remove it now the indices will get messed up
+            # Using the type as a flag for later removal, because if I just remove it the indices will get messed up
             if e1_on >= e2_on and e1_off <= e2_off:
                 ent_info[i - 1] = list(ent_info[i - 1])
             if e1_on <= e2_on and e1_off >= e2_off:
@@ -222,7 +209,7 @@ def create_json_file(data_disambiguate):
 def write_tsv(data):
     """ Creates a .tsv file of data """
     with open('data.tsv', 'w', encoding='UTF8', newline='\n') as f:
-        header = ['token', 'lemma', 'pos', '(onset, offset)', 'entity', 'babelfy_id(BIO)', 'link', 'TP', 'FP', 'FN']
+        header = ['TOKEN', 'LEMMA', 'POS', '(ONSET, OFFSET)', 'ENTITY', 'BABELFY ID (BIO)', 'LINK', 'TP', 'FP', 'FN']
         writer = csv.writer(f, delimiter='\t')
         writer.writerow(header)
         writer.writerows(data)

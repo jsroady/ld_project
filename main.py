@@ -50,7 +50,6 @@ def main():
 
     tokens, lemmas, pos, tok_index, entities, ent_on_off, synsetIds, links = generate_data(extract)
     ent_info = remove_duplicate_ents(entities, ent_on_off, synsetIds, links)
-
     data = align_toks_to_ents(tokens, lemmas, pos, tok_index, ent_info)
     write_tsv(data)
 
