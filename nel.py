@@ -64,11 +64,11 @@ def para_tokenise(stripped_lines):
     paragraph = ''
     paragraphs = []
 
-    for line in stripped_lines:  # If the line is a newline, we will know the paragraph has ended.
-        if line == '':  # It will be '' and not '\n' because we did line.strip() when reading in the file.
-            paragraphs.append(paragraph)  # We can add it to our list of paragraphs...
-            paragraph = ''  # ...and reset the paragraph string to start at the next paragraph.
-        else:  # Otherwise, we keep on appending lines, making sure to add a whitespace at the end of each one.
+    for line in stripped_lines:
+        if line == '':
+            paragraphs.append(paragraph)
+            paragraph = ''
+        else:
             paragraph += line + ' '
 
     return paragraphs
