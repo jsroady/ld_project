@@ -3,6 +3,7 @@
 # Authors: Jessica Roady & Kyra Goud
 
 import argparse
+import requests
 from nel import *
 
 
@@ -27,14 +28,13 @@ def main():
     parser = create_arg_parser()
     args = parser.parse_args()
 
-    lines = read_file('bible.txt')  # TODO: make this take command-line input
+    lines = read_file('bible.txt')
     stripped_lines = strip_headers_footers(lines)
     paragraphs = para_tokenise(stripped_lines)
 
     # TODO: change this to = stripped_lines if user says their text does not have artificial line breaks
     # params1['text'] = paragraphs
-
-    # For dev purposes, I'll work with just 10 paragraphs:
+    # ...but for now, I'll work with 10 paragraphs to minimise runtime and avoid maxing out my Babelfy requests:
     extract = paragraphs[10:21]
     params1['text'] = extract
 

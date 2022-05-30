@@ -2,7 +2,6 @@
 # *-* coding: UTF-8 *-*
 # Authors: Jessica Roady & Kyra Goud
 
-import requests
 import re
 import csv
 import json
@@ -15,11 +14,11 @@ import spacy
 # download(model='en_core_web_sm')
 
 # Variables for URL-API information retrieval (1000 requests per day and per key):
-# Jessica's key 1: ac0e292a-80e6-4040-8f33-64105a016803
-# Jessica's key 2: 1a12a465-41cd-4109-b4f3-5e84529bfaac
-# Jessica's key 3: 642b0a6e-678b-4e0f-9997-2aac099430e2
-# Simon's key: f18a3a58-5499-4e50-ad27-a9512055f56b
-# Kyra's key: 90f56d8f-b050-4366-a9f8-e183cec01edc
+#   Jessica's key 1: ac0e292a-80e6-4040-8f33-64105a016803
+#   Jessica's key 2: 1a12a465-41cd-4109-b4f3-5e84529bfaac
+#   Jessica's key 3: 642b0a6e-678b-4e0f-9997-2aac099430e2
+#   Simon's key: f18a3a58-5499-4e50-ad27-a9512055f56b
+#   Kyra's key: 90f56d8f-b050-4366-a9f8-e183cec01edc
 key = 'ac0e292a-80e6-4040-8f33-64105a016803'
 lang = 'EN'
 headers = {'Accept-Encoding': 'gzip'}
@@ -47,7 +46,7 @@ def read_file(file):
 
 
 def strip_headers_footers(lines):
-    """Strip Project Gutenberg headers/footers"""
+    """ Strip Project Gutenberg headers/footers """
     r_header = re.compile(r"\*\*\* START OF THE PROJECT GUTENBERG EBOOK .*")
     header_line = list(filter(r_header.match, lines))[0]
     r_footer = re.compile(r"\*\*\* END OF THE PROJECT GUTENBERG EBOOK .*")
@@ -60,7 +59,7 @@ def strip_headers_footers(lines):
 
 
 def para_tokenise(stripped_lines):
-    """Fix artificial line breaks"""
+    """ Fix artificial line breaks """
     paragraph = ''
     paragraphs = []
 
@@ -75,18 +74,18 @@ def para_tokenise(stripped_lines):
 
 
 def get_link(babelsynsetID):
-    """ Returns the link of the NE according to its babelsynsetID """
+    """ Return the link of a NE according to its BabelsynsetID """
     url = f'https://babelnet.org/synset?word={babelsynsetID}&lang=EN&langTrans=DE'
     return url
 
 
 def get_entity(text, cfStart, cfEnd):
-    """ Returns the entity according to the character span """
+    """ Return the entity according to the character span """
     return text[cfStart:cfEnd+1]
 
 
 def generate_data(lines):
-    """ Tokenization, lemmatization, POS-tagging, NE linking """
+    """ Perform tokenization, lemmatization, POS-tagging, and NE linking """
     nlp = spacy.load("en_core_web_sm")
     json_content = read_json('json_response.json')
 
@@ -133,7 +132,7 @@ def generate_data(lines):
 
 
 def remove_duplicate_ents(entities, ent_on_off, synsetIds, links):
-    """ Removes shortest-span entities """
+    """ Remove shortest-span entities """
     ent_info = list(zip(entities, ent_on_off, synsetIds, links))
 
     for i, item in enumerate(ent_info):
@@ -157,7 +156,7 @@ def remove_duplicate_ents(entities, ent_on_off, synsetIds, links):
 
 
 def align_toks_to_ents(tokens, lemmas, pos, tok_index, ent_info):
-    """ Aligns tokens with entities """
+    """ Align tokens to entities """
     data = []
     token_info = list(zip(tokens, lemmas, pos, tok_index))
 
@@ -194,20 +193,20 @@ def align_toks_to_ents(tokens, lemmas, pos, tok_index, ent_info):
 
 
 def read_json(file):
-    """ Reads a json file and returns its content """
+    """ Read a .json file and returns its content """
     with open(file, 'r') as j:
         json_content = json.loads(j.read())
     return json_content
 
 
 def create_json_file(data_disambiguate):
-    """ Creates a json file """
+    """ Create a .json file """
     with open('json_response.json', 'w') as f:
         json.dump(data_disambiguate, f, indent=4)
 
 
 def write_tsv(data):
-    """ Creates a .tsv file of data """
+    """ Create a .tsv file of data """
     with open('data.tsv', 'w', encoding='UTF8', newline='\n') as f:
         header = ['TOKEN', 'LEMMA', 'POS', '(ONSET, OFFSET)', 'ENTITY', 'BABELFY ID (BIO)', 'LINK', 'TP', 'FP', 'FN']
         writer = csv.writer(f, delimiter='\t')

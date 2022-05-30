@@ -7,3 +7,6 @@
 ## To do:
 - allow user to enable partial matches
 - calculate IAA between us on an excerpt
+- maybe we don't need POSs
+- try changing lines 10-15 of `nel.py` to only 14-15
+- package
